@@ -1,10 +1,12 @@
 import { revalidatePath } from "next/cache";
 
-export default function PostsPage() {
+export default async function Posts() {
   const createPost = async (data: FormData) => {
-    "use server"; // 明示的にサーバーサイドで実行することを宣言
+    "use server";
     const title = data.get("title") as string;
     const content = data.get("content") as string;
+    console.log("title", title);
+    console.log("content", content);
     // ここでAPIとの通信を行う
     fetch("https://jsonplaceholder.typicode.com/posts", {
       method: "POST",
@@ -15,8 +17,14 @@ export default function PostsPage() {
     })
       .then((response) => response.json())
       .then((json) => console.log(json));
-    revalidatePath("/posts"); // 現在のページを再生成する
+
+    revalidatePath("/posts");
   };
+
+  const posts = await fetch(
+    "https://jsonplaceholder.typicode.com/posts"
+  ).then((response) => response.json());
+
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Create Post</h1>
@@ -40,6 +48,15 @@ export default function PostsPage() {
           Submit
         </button>
       </form>
+      <h1 className="text-2xl font-bold my-6 text-center">Posts</h1>
+      <ul className="space-y-4">
+        {posts.map((post: any) => (
+          <li key={post.id} className="border border-gray-300 p-4 rounded-lg">
+            <h2 className="text-xl font-semibold">{post.title}</h2>
+            <p>{post.body}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
