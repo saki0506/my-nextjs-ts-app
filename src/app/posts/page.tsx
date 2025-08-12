@@ -1,20 +1,45 @@
-const PostsPage = async () => {
-  const res = await fetch("https://jsonplaceholder.typicode.com/posts");
-  const posts = await res.json();
+import { revalidatePath } from "next/cache";
 
+export default function PostsPage() {
+  const createPost = async (data: FormData) => {
+    "use server"; // 明示的にサーバーサイドで実行することを宣言
+    const title = data.get("title") as string;
+    const content = data.get("content") as string;
+    // ここでAPIとの通信を行う
+    fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      body: JSON.stringify({ title, body: content, userId: 1 }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    })
+      .then((response) => response.json())
+      .then((json) => console.log(json));
+    revalidatePath("/posts"); // 現在のページを再生成する
+  };
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Posts</h1>
-      <ul className="space-y-4">
-        {posts.map((post: any) => (
-          <li key={post.id} className="p-4 border rounded shadow">
-            <h2 className="text-2xl font-semibold">{post.title}</h2>
-            <p className="text-gray-700">{post.body}</p>
-          </li>
-        ))}
-      </ul>
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold mb-6 text-center">Create Post</h1>
+      <form action={createPost} className="flex flex-col gap-4">
+        <input
+          type="text"
+          name="title"
+          placeholder="Title"
+          className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <textarea
+          name="content"
+          placeholder="Content"
+          rows={5}
+          className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          type="submit"
+          className="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
+        >
+          Submit
+        </button>
+      </form>
     </div>
   );
-};
-
-export default PostsPage;
+}
