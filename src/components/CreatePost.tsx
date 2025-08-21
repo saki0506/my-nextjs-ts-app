@@ -1,5 +1,6 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const addPost = async (newPost: { title: string; body: string }) => {
@@ -14,6 +15,7 @@ const addPost = async (newPost: { title: string; body: string }) => {
 };
 
 const CreatePost = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -35,7 +37,9 @@ const CreatePost = () => {
         onSuccess: () => {
           setTitle("");
           setBody("");
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
           console.log("Post created successfully!");
+          router.push("/");
         },
         onError: () => {
           console.error("Error creating post");
