@@ -7,7 +7,7 @@ interface Data {
 
 export async function GET(request: NextRequest) {
   const data: Data = {
-    message: 'Hello, Next.js with TypeScript!'
+    message: 'Hello World'
   };
 
   return NextResponse.json(data);
